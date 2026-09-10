@@ -559,23 +559,17 @@ describe('TimeGridHeaderResources — all-day event filter', () => {
       false,
     ])
   })
+})
 
-  test('filters events by resource and date match', () => {
-    const resources = makeResourceList()
-    const range2 = [new Date(2023, 0, 9), new Date(2023, 0, 10), new Date(2023, 0, 11)]
-    const events = [
-      // Event that starts on Jan 9 and has resourceId r1 → isSameDate(event.start, Jan9) = true
-      { id: 1, title: 'R1 Jan9', start: new Date(2023, 0, 9, 10), end: new Date(2023, 0, 9, 11), resourceId: 'r1', allDay: false },
-      // Event that ends on Jan 10 → isSameDate(event.end, Jan10) = true
-      { id: 2, title: 'R2 ends Jan10', start: new Date(2023, 0, 8, 9), end: new Date(2023, 0, 10, 12), resourceId: 'r2', allDay: false },
-      // Event not on any displayed date → filtered out
-      { id: 3, title: 'Elsewhere', start: new Date(2023, 0, 20, 9), end: new Date(2023, 0, 20, 10), resourceId: 'r1', allDay: false },
-    ]
+describe('TimeGridHeaderResources — resource row class', () => {
+  const range = [new Date(2023, 0, 9), new Date(2023, 0, 10)]
+
+  test('names the resource row the way TimeGridHeader does', () => {
     const { container } = render(
       <TimeGridHeaderResources
-        range={range2}
-        events={events}
-        resources={resources}
+        range={range}
+        events={[]}
+        resources={makeResourceList()}
         accessors={fullAccessors}
         getNow={() => new Date(2023, 0, 11)}
         localizer={mergedLocalizer}
@@ -599,6 +593,14 @@ describe('TimeGridHeaderResources — all-day event filter', () => {
         longPressThreshold={250}
       />
     )
-    expect(container.querySelector('.rbc-time-header')).toBeInTheDocument()
+
+    // `.rbc-time-header-content > .rbc-row.rbc-row-resource` is what carries
+    // the `border-bottom` and `flex-shrink: 0` in sass/time-grid.scss, so the
+    // row has to keep the class for the grouping header to be styled at all.
+    expect(
+      container.querySelectorAll(
+        '.rbc-time-header-content > .rbc-row.rbc-row-resource'
+      )
+    ).toHaveLength(range.length)
   })
 })
